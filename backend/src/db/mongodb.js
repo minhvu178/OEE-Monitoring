@@ -9,7 +9,7 @@ class MongoDBConnection {
     this.config = config || {
       host: 'localhost',
       port: 27017,
-      database: 'iot_data'
+      database: 'oee_data'
     };
     this.isConnected = false;
   }
