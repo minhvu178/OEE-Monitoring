@@ -1,3 +1,4 @@
+// src/db/mongodb.js
 const mongoose = require('mongoose');
 
 /**
@@ -12,7 +13,7 @@ class MongoDBConnection {
     };
     this.isConnected = false;
   }
-  
+
   /**
    * Connect to MongoDB
    */
@@ -28,11 +29,9 @@ class MongoDBConnection {
         uri = `mongodb://${host}:${port}/${database}`;
       }
       
-      // Connect to MongoDB
-      await mongoose.connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      });
+      // Connect to MongoDB - updated for MongoDB 6.x and Mongoose 7.x
+      // Removed deprecated options and using the new connection approach
+      await mongoose.connect(uri);
       
       console.log(`Connected to MongoDB at ${host}:${port}/${database}`);
       this.isConnected = true;
@@ -42,7 +41,7 @@ class MongoDBConnection {
       throw error;
     }
   }
-  
+
   /**
    * Disconnect from MongoDB
    */
@@ -55,4 +54,4 @@ class MongoDBConnection {
   }
 }
 
-module.exports = MongoDBConnection; 
+module.exports = MongoDBConnection;
