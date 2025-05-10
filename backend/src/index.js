@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+dotenv.config();
 const MongoDBConnection = require('./db/mongodb');
 const factoryRoutes = require('./routes/factoryRoutes');
 const deviceRoutes = require('./routes/deviceRoutes');

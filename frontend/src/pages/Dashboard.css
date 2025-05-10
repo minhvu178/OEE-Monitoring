@@ -1,0 +1,18 @@
+.dashboard {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 24px;
+}
+
+.filters {
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.chart-container {
+  padding: 16px;
+  height: 100%;
+}

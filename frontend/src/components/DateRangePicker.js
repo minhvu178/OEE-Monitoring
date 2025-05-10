@@ -1,53 +1,87 @@
 import React from 'react';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { Grid, Typography } from '@mui/material';
+import { Box, TextField, Button, Grid, Typography } from '@mui/material';
 
 const DateRangePicker = ({ dateRange, onDateRangeChange }) => {
-  const handleStartDateChange = (newDate) => {
+  const handleStartDateChange = (event) => {
     onDateRangeChange({
       ...dateRange,
-      startDate: newDate
+      startDate: new Date(event.target.value)
     });
   };
 
-  const handleEndDateChange = (newDate) => {
+  const handleEndDateChange = (event) => {
     onDateRangeChange({
       ...dateRange,
-      endDate: newDate
+      endDate: new Date(event.target.value)
     });
+  };
+
+  // Set quick date ranges
+  const setLastWeek = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 7);
+    onDateRangeChange({ startDate: start, endDate: end });
+  };
+
+  const setLastMonth = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setMonth(end.getMonth() - 1);
+    onDateRangeChange({ startDate: start, endDate: end });
+  };
+
+  // Format date for input
+  const formatDate = (date) => {
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return [year, month, day].join('-');
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
+    <Box>
       <Grid container spacing={2} alignItems="center">
         <Grid item>
           <Typography variant="body1">Time Period:</Typography>
         </Grid>
         <Grid item>
-          <DatePicker
+          <TextField
             label="Start Date"
-            value={dateRange.startDate}
+            type="date"
+            value={formatDate(dateRange.startDate)}
             onChange={handleStartDateChange}
-            maxDate={dateRange.endDate}
+            InputLabelProps={{ shrink: true }}
+            size="small"
           />
         </Grid>
         <Grid item>
           <Typography variant="body1">to</Typography>
         </Grid>
         <Grid item>
-          <DatePicker
+          <TextField
             label="End Date"
-            value={dateRange.endDate}
+            type="date"
+            value={formatDate(dateRange.endDate)}
             onChange={handleEndDateChange}
-            minDate={dateRange.startDate}
-            maxDate={new Date()}
+            InputLabelProps={{ shrink: true }}
+            size="small"
           />
         </Grid>
+        <Grid item>
+          <Button size="small" variant="outlined" onClick={setLastWeek}>Last 7 Days</Button>
+        </Grid>
+        <Grid item>
+          <Button size="small" variant="outlined" onClick={setLastMonth}>Last 30 Days</Button>
+        </Grid>
       </Grid>
-    </LocalizationProvider>
+    </Box>
   );
 };
 
-export default DateRangePicker; 
+export default DateRangePicker;
