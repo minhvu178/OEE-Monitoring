@@ -92,24 +92,55 @@ const Dashboard = () => {
           const startDate = dateRange.startDate.toISOString();
           const endDate = dateRange.endDate.toISOString();
           
-          console.log('Would fetch OEE data with params:', { factoryId: selectedFactory, deviceId: selectedDevice, startDate, endDate });
+          console.log('Fetching OEE data with params:', { factoryId: selectedFactory, deviceId: selectedDevice, startDate, endDate });
           
-          // Debug waterfall data fetch
-          console.log("Attempting to fetch from URL:", `${API_URL}/oee/waterfall?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
-          
+          // Fetch OEE summary data
           try {
-            const response = await fetch(`${API_URL}/oee/waterfall?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
-            console.log("Response status:", response.status);
-            const data = await response.json();
-            console.log("Data received:", data);
-            setOeeWaterfall(data);
+            console.log("Fetching summary from:", `${API_URL}/oee/summary?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
+            const summaryResponse = await fetch(`${API_URL}/oee/summary?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
+            const summaryData = await summaryResponse.json();
+            console.log("Summary data received:", summaryData);
+            setOeeSummary(summaryData);
+          } catch (error) {
+            console.error("Error fetching summary data:", error);
+          }
+          
+          // Fetch OEE waterfall data
+          try {
+            console.log("Fetching waterfall from:", `${API_URL}/oee/waterfall?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
+            const waterfallResponse = await fetch(`${API_URL}/oee/waterfall?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
+            const waterfallData = await waterfallResponse.json();
+            console.log("Waterfall data received:", waterfallData);
+            setOeeWaterfall(waterfallData);
           } catch (error) {
             console.error("Error fetching waterfall data:", error);
           }
           
+          // Fetch OEE timeline data
+          try {
+            console.log("Fetching timeline from:", `${API_URL}/oee/timeline?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}&interval=daily`);
+            const timelineResponse = await fetch(`${API_URL}/oee/timeline?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}&interval=daily`);
+            const timelineData = await timelineResponse.json();
+            console.log("Timeline data received:", timelineData);
+            setOeeTimeline(timelineData);
+          } catch (error) {
+            console.error("Error fetching timeline data:", error);
+          }
+          
+          // Fetch stop causes data
+          try {
+            console.log("Fetching stop causes from:", `${API_URL}/oee/stops?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
+            const stopsResponse = await fetch(`${API_URL}/oee/stops?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
+            const stopsData = await stopsResponse.json();
+            console.log("Stop causes data received:", stopsData);
+            setStopCauses(stopsData);
+          } catch (error) {
+            console.error("Error fetching stop causes data:", error);
+          }
+          
           setLoading(false);
         } catch (error) {
-          console.error('Error fetching OEE data:', error);
+          console.error('Error in OEE data fetching:', error);
           setLoading(false);
         }
       };
