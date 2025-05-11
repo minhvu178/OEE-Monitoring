@@ -8,25 +8,10 @@ class IoTDataAdapter {
   constructor(db) {
     this.db = db;
     
-    // Define models for IoT data
+    // Single collection model for all data types
     this.SensorData = mongoose.model('SensorData', new mongoose.Schema({}, { 
       strict: false,
       collection: 'sensor_data'
-    }));
-    
-    this.MachineStatus = mongoose.model('MachineStatus', new mongoose.Schema({}, { 
-      strict: false, 
-      collection: 'machine_status'
-    }));
-    
-    this.ProductionData = mongoose.model('ProductionData', new mongoose.Schema({}, { 
-      strict: false,
-      collection: 'production_data'
-    }));
-    
-    this.QualityData = mongoose.model('QualityData', new mongoose.Schema({}, { 
-      strict: false,
-      collection: 'quality_data'
     }));
   }
   
@@ -79,9 +64,10 @@ class IoTDataAdapter {
    */
   async getMachineStatusData(factoryId, deviceId, startDate, endDate) {
     try {
-      return await this.MachineStatus.find({
+      return await this.SensorData.find({
         "metadata.factoryId": factoryId,
         "metadata.deviceId": deviceId,
+        "metadata.type": "machine_status", // Filter by type instead of collection
         timestamp: { $gte: new Date(startDate), $lte: new Date(endDate) }
       }).sort({ timestamp: 1 });
     } catch (error) {
@@ -95,9 +81,10 @@ class IoTDataAdapter {
    */
   async getProductionData(factoryId, deviceId, startDate, endDate) {
     try {
-      return await this.ProductionData.find({
+      return await this.SensorData.find({
         "metadata.factoryId": factoryId,
         "metadata.deviceId": deviceId,
+        "metadata.type": "production", // Filter by type instead of collection
         timestamp: { $gte: new Date(startDate), $lte: new Date(endDate) }
       }).sort({ timestamp: 1 });
     } catch (error) {
@@ -111,9 +98,10 @@ class IoTDataAdapter {
    */
   async getQualityData(factoryId, deviceId, startDate, endDate) {
     try {
-      return await this.QualityData.find({
+      return await this.SensorData.find({
         "metadata.factoryId": factoryId,
         "metadata.deviceId": deviceId,
+        "metadata.type": "quality_check", // Filter by type instead of collection
         timestamp: { $gte: new Date(startDate), $lte: new Date(endDate) }
       }).sort({ timestamp: 1 });
     } catch (error) {

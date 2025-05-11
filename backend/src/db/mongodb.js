@@ -9,7 +9,7 @@ class MongoDBConnection {
     this.config = config || {
       host: 'localhost',
       port: 27017,
-      database: 'oee_data'
+      database: 'iot_data'
     };
     this.isConnected = false;
   }
@@ -29,9 +29,11 @@ class MongoDBConnection {
         uri = `mongodb://${host}:${port}/${database}`;
       }
       
-      // Connect to MongoDB - updated for MongoDB 6.x and Mongoose 7.x
-      // Removed deprecated options and using the new connection approach
-      await mongoose.connect(uri);
+      // Connect to MongoDB
+      await mongoose.connect(uri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
       
       console.log(`Connected to MongoDB at ${host}:${port}/${database}`);
       this.isConnected = true;

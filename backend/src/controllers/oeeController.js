@@ -4,6 +4,47 @@ const OEECalculator = require('../utils/oeeCalculator');
 // Initialize data adapter
 const dataAdapter = new IoTDataAdapter();
 
+/**
+ * Helper function to calculate time periods based on interval
+ */
+function calculateTimePeriods(start, end, interval) {
+  const periods = [];
+  let current = new Date(start);
+  
+  while (current < end) {
+    const periodStart = new Date(current);
+    let periodEnd;
+    
+    switch (interval) {
+      case 'hourly':
+        periodEnd = new Date(current.getTime() + 60 * 60 * 1000);
+        break;
+      case 'daily':
+        periodEnd = new Date(current.getTime() + 24 * 60 * 60 * 1000);
+        break;
+      case 'weekly':
+        periodEnd = new Date(current.getTime() + 7 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        periodEnd = new Date(current.getTime() + 24 * 60 * 60 * 1000); // Default to daily
+    }
+    
+    // Ensure period end doesn't exceed the overall end date
+    if (periodEnd > end) {
+      periodEnd = end;
+    }
+    
+    periods.push({
+      start: periodStart,
+      end: periodEnd
+    });
+    
+    current = periodEnd;
+  }
+  
+  return periods;
+}
+
 // OEE Controller
 const OEEController = {
   // Get factories
@@ -119,9 +160,6 @@ const OEEController = {
       // Calculate waterfall data
       const waterfallData = OEECalculator.calculateWaterfallData(metrics);
       
-      // Get stop causes
-      const stopCauses = OEECalculator.calculateStopCauses(machineStatusData);
-      
       res.json({
         factoryId,
         deviceId,
@@ -156,7 +194,7 @@ const OEEController = {
       const start = new Date(startDate || '2023-01-01');
       const end = new Date(endDate || new Date());
       
-      // Define time intervals (hourly, daily, weekly)
+      // Define time interval (hourly, daily, weekly)
       const timeInterval = interval || 'daily';
       
       // Get machine status data
@@ -171,7 +209,7 @@ const OEEController = {
       // Calculate time periods based on interval
       const periods = calculateTimePeriods(start, end, timeInterval);
       
-      // Calculate OEE for each time period
+      // Calculate OEE timeline data
       const timelineData = OEECalculator.calculateTimelineMetrics(
         machineStatusData,
         productionData,
@@ -187,7 +225,7 @@ const OEEController = {
           end: end.toISOString(),
           interval: timeInterval
         },
-        timelineData
+        timeline: timelineData
       });
     } catch (error) {
       console.error('Error calculating OEE timeline:', error);
@@ -211,27 +249,8 @@ const OEEController = {
       // Get machine status data
       const machineStatusData = await dataAdapter.getMachineStatusData(factoryId, deviceId, start, end);
       
-      // Calculate stop causes and durations
+      // Calculate stop causes
       const stopCauses = OEECalculator.calculateStopCauses(machineStatusData);
-      
-      // Group stops by category
-      const categories = ['Loss During Operation', 'Batch Specific Non-Operation', 'Non-Production Activities'];
-      const stopsByCategory = {
-        lossDuringOperation: [],
-        batchSpecific: [],
-        nonProduction: []
-      };
-      
-      // Categorize stops
-      for (const stop of stopCauses) {
-        if (stop.category === 'Loss During Operation') {
-          stopsByCategory.lossDuringOperation.push(stop);
-        } else if (stop.category === 'Batch Specific Non-Operation') {
-          stopsByCategory.batchSpecific.push(stop);
-        } else if (stop.category === 'Non-Production Activities') {
-          stopsByCategory.nonProduction.push(stop);
-        }
-      }
       
       res.json({
         factoryId,
@@ -240,7 +259,7 @@ const OEEController = {
           start: start.toISOString(),
           end: end.toISOString()
         },
-        stopsByCategory
+        stopCauses
       });
     } catch (error) {
       console.error('Error fetching stop causes:', error);
@@ -248,47 +267,5 @@ const OEEController = {
     }
   }
 };
-
-// Helper function to calculate time periods for timeline
-function calculateTimePeriods(start, end, interval) {
-  const periods = [];
-  let currentStart = new Date(start);
-  
-  while (currentStart < end) {
-    let currentEnd;
-    
-    switch (interval) {
-      case 'hourly':
-        currentEnd = new Date(currentStart);
-        currentEnd.setHours(currentEnd.getHours() + 1);
-        break;
-      case 'daily':
-        currentEnd = new Date(currentStart);
-        currentEnd.setDate(currentEnd.getDate() + 1);
-        break;
-      case 'weekly':
-        currentEnd = new Date(currentStart);
-        currentEnd.setDate(currentEnd.getDate() + 7);
-        break;
-      default:
-        currentEnd = new Date(currentStart);
-        currentEnd.setDate(currentEnd.getDate() + 1);
-    }
-    
-    // Ensure we don't go past the end date
-    if (currentEnd > end) {
-      currentEnd = new Date(end);
-    }
-    
-    periods.push({
-      start: new Date(currentStart),
-      end: new Date(currentEnd)
-    });
-    
-    currentStart = new Date(currentEnd);
-  }
-  
-  return periods;
-}
 
 module.exports = OEEController; 

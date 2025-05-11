@@ -6,6 +6,7 @@ dotenv.config();
 const MongoDBConnection = require('./db/mongodb');
 const factoryRoutes = require('./routes/factoryRoutes');
 const deviceRoutes = require('./routes/deviceRoutes');
+const oeeRoutes = require('./routes/oeeRoutes');
 
 // Initialize Express app
 const app = express();
@@ -39,6 +40,7 @@ dbConnection.connect()
 // Routes
 app.use('/api/factories', factoryRoutes);
 app.use('/api/devices', deviceRoutes);
+app.use('/api/oee', oeeRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
