@@ -94,7 +94,19 @@ const Dashboard = () => {
           
           console.log('Would fetch OEE data with params:', { factoryId: selectedFactory, deviceId: selectedDevice, startDate, endDate });
           
-          // Since OEE endpoints aren't implemented, just set loading to false
+          // Debug waterfall data fetch
+          console.log("Attempting to fetch from URL:", `${API_URL}/oee/waterfall?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
+          
+          try {
+            const response = await fetch(`${API_URL}/oee/waterfall?factoryId=${selectedFactory}&deviceId=${selectedDevice}&startDate=${startDate}&endDate=${endDate}`);
+            console.log("Response status:", response.status);
+            const data = await response.json();
+            console.log("Data received:", data);
+            setOeeWaterfall(data);
+          } catch (error) {
+            console.error("Error fetching waterfall data:", error);
+          }
+          
           setLoading(false);
         } catch (error) {
           console.error('Error fetching OEE data:', error);
